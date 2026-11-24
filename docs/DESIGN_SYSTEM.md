@@ -1,0 +1,2 @@
+# Arculat
+A jóváhagyott desktop látványterv az elsődleges vizuális referencia. Krém #F1EBE4, petrol #192D32, bordó #591B28, olíva #535440. Címsorok: helyi Georgia/Times serif fallback, kezelőfelület: rendszer sans-serif. Kis sarokkerekítés, finom választóvonalak, szerkesztőségi elrendezés. A hero és játékborítók a jóváhagyott referenciából kivágott, optimalizált prototípus-képek. A végleges, különálló médiaanyagok elkészítése és a helyi fontok licencellenőrzése a következő arculati fázis.
