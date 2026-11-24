@@ -15,14 +15,24 @@ window.AKIBUJT_FEATURES=(()=>{
   const l=p.location;
   return '<section class="location-gate"><h3>Helyszíni feladat</h3><p>A választ csak a helyszín 200 méteres körzetében adhatod meg. Engedélyezd a helymeghatározást; a pozíciód nem kerül a szerverünkre.</p><strong>'+esc(l.name)+'</strong><div id="location-map" role="region" aria-label="A feladat helyszíne térképen"></div><button class="btn secondary small" type="button" id="check-location">Itt vagyok – helyzet ellenőrzése</button><p id="location-feedback" class="feedback" role="status" aria-live="polite">A válaszmező még zárolva van.</p></section>';
  }
+ function shuffled(values,seed){
+  const out=[...values];let n=2166136261;
+  for(const ch of seed)n=Math.imul(n^ch.charCodeAt(0),16777619)>>>0;
+  for(let i=out.length-1;i>0;i--){n=(Math.imul(n,1664525)+1013904223)>>>0;const j=n%(i+1);[out[i],out[j]]=[out[j],out[i]]}
+  if(out.length>1&&out.every((x,i)=>x===values[i]))out.reverse();
+  return out;
+ }
  function answerFields(p,esc){
   const type=p.answerType||'text';
   let control='';
   if(type==='choice')control='<div class="choices">'+(p.options||[]).map((o,i)=>'<label><input type="radio" name="choice" value="'+esc(o)+'" required><span>'+esc(o)+'</span></label>').join('')+'</div>';
   else if(type==='number')control='<input id="answer" type="number" step="any" inputmode="decimal" required placeholder="Írd be a számot">';
   else if(type==='photo')control='<div class="photo-answer"><input id="answer-photo" type="file" accept="image/*" capture="environment" required><p class="quiet">Legfeljebb 10 MB-os fényképet válassz. A kép csak ezen az eszközön jelenik meg, nem töltődik fel a szerverre és nem ellenőrizzük automatikusan a tartalmát.</p><img id="photo-preview" alt="A kiválasztott kép előnézete" hidden></div>';
+  else if(type==='order')control='<div class="ordering"><p class="quiet">Rendezd az elemeket a helyes sorrendbe. Húzhatod őket, vagy használhatod a Fel és Le gombokat.</p><ol id="order-list" class="sort-list">'+shuffled(p.items||[],p.title+p.question).map(item=>'<li draggable="true" data-value="'+esc(item)+'"><span class="sort-handle" aria-hidden="true">⠿</span><span class="sort-text">'+esc(item)+'</span><div class="sort-actions"><button type="button" data-move="up" aria-label="'+esc(item)+' feljebb">Fel</button><button type="button" data-move="down" aria-label="'+esc(item)+' lejjebb">Le</button></div></li>').join('')+'</ol></div>';
+  else if(type==='matching')control='<div class="matching"><p class="quiet">Mindegyik bal oldali elemhez válaszd ki a hozzá tartozó párt. Egy jobb oldali választ csak egyszer használhatsz.</p><div id="match-list" class="match-list">'+(p.pairs||[]).map((pair,i)=>'<label><span>'+esc(pair.left)+'</span><select data-match="'+i+'" required><option value="">Válassz párt…</option>'+shuffled(p.pairs.map(x=>x.right),p.title+p.question).map(right=>'<option value="'+esc(right)+'">'+esc(right)+'</option>').join('')+'</select></label>').join('')+'</div></div>';
   else control='<input id="answer" autocomplete="off" required maxlength="120" placeholder="Írd be a megfejtést">';
-  return '<form class="answer-form" id="answer-form"><label class="question"'+(type==='choice'?'':' for="'+(type==='photo'?'answer-photo':'answer')+'"')+'>'+esc(p.question)+'</label><fieldset id="answer-lock" '+(p.location?'disabled':'')+'><div class="answer-row">'+control+'<button class="btn" type="submit">Ellenőrzés</button></div></fieldset><div id="feedback" class="feedback" role="status" aria-live="polite"></div></form>';
+  const question=['choice','order','matching'].includes(type)?'<p class="question">'+esc(p.question)+'</p>':'<label class="question" for="'+(type==='photo'?'answer-photo':'answer')+'">'+esc(p.question)+'</label>';
+  return '<form class="answer-form" id="answer-form">'+question+'<fieldset id="answer-lock" '+(p.location?'disabled':'')+'><div class="answer-row">'+control+'<button class="btn" type="submit">Ellenőrzés</button></div></fieldset><div id="feedback" class="feedback" role="status" aria-live="polite"></div></form>';
  }
  function clearMap(){if(map){map.remove();map=null}userMarker=null}
  function mountMap(p){
@@ -58,6 +68,26 @@ window.AKIBUJT_FEATURES=(()=>{
  function bind(p,norm,onCorrect){
   mountMap(p);
   const form=document.getElementById('answer-form'),lock=document.getElementById('answer-lock'),feedback=document.getElementById('feedback');
+  const orderList=document.getElementById('order-list');
+  if(orderList){
+   orderList.addEventListener('click',e=>{
+    const button=e.target.closest('button[data-move]');if(!button)return;
+    const item=button.closest('li'),other=button.dataset.move==='up'?item.previousElementSibling:item.nextElementSibling;
+    if(!other)return;
+    if(button.dataset.move==='up')orderList.insertBefore(item,other);
+    else orderList.insertBefore(other,item);
+    button.focus();feedback.textContent='';
+   });
+   let dragged=null;
+   orderList.addEventListener('dragstart',e=>{dragged=e.target.closest('li');if(dragged)e.dataTransfer.effectAllowed='move'});
+   orderList.addEventListener('dragover',e=>{if(dragged&&e.target.closest('li'))e.preventDefault()});
+   orderList.addEventListener('drop',e=>{
+    e.preventDefault();const target=e.target.closest('li');
+    if(dragged&&target&&dragged!==target){const nodes=[...orderList.children],from=nodes.indexOf(dragged),to=nodes.indexOf(target);orderList.insertBefore(dragged,from<to?target.nextSibling:target)}
+    dragged=null;feedback.textContent='';
+   });
+   orderList.addEventListener('dragend',()=>{dragged=null});
+  }
   if(p.location)document.getElementById('check-location').addEventListener('click',async e=>{
    e.currentTarget.disabled=true;
    lock.disabled=!(await check(p,document.getElementById('location-feedback')));
@@ -86,6 +116,11 @@ window.AKIBUJT_FEATURES=(()=>{
    }else if(type==='number'){
     const raw=form.querySelector('#answer').value.replace(',','.');
     correct=raw.trim()!==''&&Number.isFinite(Number(raw))&&(p.answers||[]).some(a=>Number(a.replace(',','.'))===Number(raw));
+   }else if(type==='order'){
+    correct=[...orderList.children].every((row,i)=>row.dataset.value===p.items[i]);
+   }else if(type==='matching'){
+    const selected=[...form.querySelectorAll('select[data-match]')].map(x=>x.value);
+    correct=selected.length===p.pairs.length&&selected.every((value,i)=>value===p.pairs[i].right)&&new Set(selected).size===selected.length;
    }else correct=(p.answers||[]).some(a=>norm(a)===norm(form.querySelector('#answer').value));
    if(correct)onCorrect();
    else{if(type!=='photo')feedback.textContent='Ez a nyom még nem vezet tovább. Nézd át újra a bizonyítékokat!';button.disabled=false}

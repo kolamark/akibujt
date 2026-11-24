@@ -7,3 +7,8 @@ A privát szerkesztőben a játék adatlapján kapcsold be a **Helyszíni játé
 Feladattípusok: szöveges (alapértelmezett), feleletválasztós (2–8 opció, a helyes válasz szerepeljen köztük), számos (egyenlőség a megadott elfogadott számok valamelyikével), képfeladat. A képfeladat legfeljebb 10 MB-os helyi képfájlt kér és előnézetet mutat. A kép nem jut el szerverre, nem része a mentésnek, és nem kerül automatikus vagy emberi ellenőrzésre. Valódi fotóbizonyítékhoz később külön feltöltő és moderációs szolgáltatás kell.
 
 Borítók: három korábbi kép és négy új tematikus illusztrált/fotografikus lehetőség (Budapest, erdő, hotel, archívum). Az új képek egy atlaszból jelennek meg. A játékverziót emeld, ha már játszott feladványok sorrendjét vagy megoldását módosítod.
+
+### Sorrend és párok
+A **Sorrendbe rendezés** típusnál a szerkesztőbe soronként írd be az elemeket a helyes sorrendben (2–12 különböző sor). A játékos kevert listát kap, amelyet húzással vagy Fel/Le gombokkal rendezhet; a beküldéskor minden pozíciót ellenőriz a játék.
+
+A **Párosítás** típusnál adj meg 2–12 különböző bal és jobb oldali elemből álló párt. A játékos a bal oldali elemek mellett legördülő listából választja ki a jobb oldali párjukat. Minden párnak pontosan egyeznie kell, ugyanaz a jobb oldali elem nem használható kétszer. Mindkét típus helyszíni feladattal is kombinálható; ekkor a 200 méteres kapu a beküldéskor újra ellenőriz.
