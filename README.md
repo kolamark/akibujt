@@ -1,8 +1,8 @@
 # Aki Bújt Aki Nem
 
-**Nyilvános weboldal:** https://aki-bujt-aki-nem.kolarovszki-mark.chatgpt.site/
+**Nyilvános weboldal:** https://kolamark.github.io/akibujt/
 
-A weboldal jelenleg ezen a címen érhető el; a GitHub Pages szolgáltatás ehhez a repóhoz még nincs bekapcsolva.
+A GitHub Pages a `main` ág gyökeréből publikál; a későbbi forrásmódosítások ugyanebből az ágból kerülnek ki.
 
 Ingyenes, böngészőből játszható magyar rejtélyjáték-platform. A főoldal és a játék mobilon és számítógépen is használható. Nincs regisztráció, fizetőfal, reklám vagy futásidejű AI API.
 
