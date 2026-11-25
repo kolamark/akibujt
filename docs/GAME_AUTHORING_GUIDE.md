@@ -12,3 +12,13 @@ Borítók: három korábbi kép és négy új tematikus illusztrált/fotografiku
 A **Sorrendbe rendezés** típusnál a szerkesztőbe soronként írd be az elemeket a helyes sorrendben (2–12 különböző sor). A játékos kevert listát kap, amelyet húzással vagy Fel/Le gombokkal rendezhet; a beküldéskor minden pozíciót ellenőriz a játék.
 
 A **Párosítás** típusnál adj meg 2–12 különböző bal és jobb oldali elemből álló párt. A játékos a bal oldali elemek mellett legördülő listából választja ki a jobb oldali párjukat. Minden párnak pontosan egyeznie kell, ugyanaz a jobb oldali elem nem használható kétszer. Mindkét típus helyszíni feladattal is kombinálható; ekkor a 200 méteres kapu a beküldéskor újra ellenőriz.
+
+## Játéktípusok és felfedezős feladatok
+
+A szerkesztőben minden játék kap egy `kind` mezőt: `adventure` (Kalandok), `investigation` (Nyomozások), `challenge` (Kihívások). A régi játékoknál a típust a játékosoldal a korábbi adatokból állapítja meg: „Az elveszett örökség” nyomozás, a többi régi játék kaland. A kategória szabad témacímke, nem a gyűjtőoldalt dönti el.
+
+- **Kaland:** helyszínbejárás és változatos feladatok. A `count` egy helyes számot vár; a `find` a megtalált részletet ellenőrzi a megadott elfogadott válaszokkal; a `self_report` egy kötelező önbevallásos jelöléssel teljesíthető, és nincs automatikusan ellenőrzött helyes válasza.
+- **Nyomozás:** történet, dokumentumok és pontosan három segítség feladványonként. A nyitójelenet és a lezárás kötelező.
+- **Kihívás:** rövid, önálló feladatsor. A gyűjtőoldal már működik, de csak akkor jelenik meg rajta játék, ha az adminban publikáltál egyet.
+
+Kalandnál és kihívásnál a fejezet, jelenet, címke, dokumentum, segítségek, nyitó- és lezáró szöveg elhagyható; a feladat címe és szövege kötelező. A helyszín feladatonként adható meg, vagy a teljes játékra előírható a 200 méteres körzet. Az önbevallásos teljesítés nem bizonyítja, hogy a játékos tényleg végrehajtotta a feladatot. A fotós feladat továbbra is helyi kiválasztás, szerveres feltöltés nélkül.

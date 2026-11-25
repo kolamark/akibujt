@@ -13,7 +13,7 @@ window.AKIBUJT_FEATURES=(()=>{
  function locationPanel(p,esc){
   if(!p.location)return '';
   const l=p.location;
-  return '<section class="location-gate"><h3>Helyszíni feladat</h3><p>A választ csak a helyszín 200 méteres körzetében adhatod meg. Engedélyezd a helymeghatározást; a pozíciód nem kerül a szerverünkre.</p><strong>'+esc(l.name)+'</strong><div id="location-map" role="region" aria-label="A feladat helyszíne térképen"></div><button class="btn secondary small" type="button" id="check-location">Itt vagyok – helyzet ellenőrzése</button><p id="location-feedback" class="feedback" role="status" aria-live="polite">A válaszmező még zárolva van.</p></section>';
+  return '<section class="location-gate"><h3>Helyszíni feladat</h3><p>A feladatot csak a helyszín 200 méteres körzetében teljesítheted. Engedélyezd a helymeghatározást; a pozíciód nem kerül a szerverünkre.</p><strong>'+esc(l.name)+'</strong><div id="location-map" role="region" aria-label="A feladat helyszíne térképen"></div><button class="btn secondary small" type="button" id="check-location">Itt vagyok – helyzet ellenőrzése</button><p id="location-feedback" class="feedback" role="status" aria-live="polite">A válaszmező még zárolva van.</p></section>';
  }
  function shuffled(values,seed){
   const out=[...values];let n=2166136261;
@@ -26,13 +26,14 @@ window.AKIBUJT_FEATURES=(()=>{
   const type=p.answerType||'text';
   let control='';
   if(type==='choice')control='<div class="choices">'+(p.options||[]).map((o,i)=>'<label><input type="radio" name="choice" value="'+esc(o)+'" required><span>'+esc(o)+'</span></label>').join('')+'</div>';
-  else if(type==='number')control='<input id="answer" type="number" step="any" inputmode="decimal" required placeholder="Írd be a számot">';
+  else if(type==='number'||type==='count')control=type==='count'?'<input id="answer" type="number" step="1" min="0" inputmode="numeric" required placeholder="Hányat számoltál?">':'<input id="answer" type="number" step="any" inputmode="decimal" required placeholder="Írd be a számot">';
+  else if(type==='self_report')control='<label class="self-report"><input id="self-report-check" type="checkbox" required><span>A feladatot valóban teljesítettük.</span></label><p class="quiet">Önbevallásos feladat: a teljesítést a játék nem ellenőrzi automatikusan.</p>';
   else if(type==='photo')control='<div class="photo-answer"><input id="answer-photo" type="file" accept="image/*" capture="environment" required><p class="quiet">Legfeljebb 10 MB-os fényképet válassz. A kép csak ezen az eszközön jelenik meg, nem töltődik fel a szerverre és nem ellenőrizzük automatikusan a tartalmát.</p><img id="photo-preview" alt="A kiválasztott kép előnézete" hidden></div>';
   else if(type==='order')control='<div class="ordering"><p class="quiet">Rendezd az elemeket a helyes sorrendbe. Húzhatod őket, vagy használhatod a Fel és Le gombokat.</p><ol id="order-list" class="sort-list">'+shuffled(p.items||[],p.title+p.question).map(item=>'<li draggable="true" data-value="'+esc(item)+'"><span class="sort-handle" aria-hidden="true">⠿</span><span class="sort-text">'+esc(item)+'</span><div class="sort-actions"><button type="button" data-move="up" aria-label="'+esc(item)+' feljebb">Fel</button><button type="button" data-move="down" aria-label="'+esc(item)+' lejjebb">Le</button></div></li>').join('')+'</ol></div>';
   else if(type==='matching')control='<div class="matching"><p class="quiet">Mindegyik bal oldali elemhez válaszd ki a hozzá tartozó párt. Egy jobb oldali választ csak egyszer használhatsz.</p><div id="match-list" class="match-list">'+(p.pairs||[]).map((pair,i)=>'<label><span>'+esc(pair.left)+'</span><select data-match="'+i+'" required><option value="">Válassz párt…</option>'+shuffled(p.pairs.map(x=>x.right),p.title+p.question).map(right=>'<option value="'+esc(right)+'">'+esc(right)+'</option>').join('')+'</select></label>').join('')+'</div></div>';
-  else control='<input id="answer" autocomplete="off" required maxlength="120" placeholder="Írd be a megfejtést">';
-  const question=['choice','order','matching'].includes(type)?'<p class="question">'+esc(p.question)+'</p>':'<label class="question" for="'+(type==='photo'?'answer-photo':'answer')+'">'+esc(p.question)+'</label>';
-  return '<form class="answer-form" id="answer-form">'+question+'<fieldset id="answer-lock" '+(p.location?'disabled':'')+'><div class="answer-row">'+control+'<button class="btn" type="submit">Ellenőrzés</button></div></fieldset><div id="feedback" class="feedback" role="status" aria-live="polite"></div></form>';
+  else control='<input id="answer" autocomplete="off" required maxlength="120" placeholder="'+(type==='find'?'Mit találtál?':'Írd be a megfejtést')+'">';
+  const question=['choice','order','matching','self_report'].includes(type)?'<p class="question">'+esc(p.question)+'</p>':'<label class="question" for="'+(type==='photo'?'answer-photo':'answer')+'">'+esc(p.question)+'</label>';
+  return '<form class="answer-form" id="answer-form">'+question+'<fieldset id="answer-lock" '+(p.location?'disabled':'')+'><div class="answer-row">'+control+'<button class="btn" type="submit">'+(type==='self_report'?'Teljesítettük':'Ellenőrzés')+'</button></div></fieldset><div id="feedback" class="feedback" role="status" aria-live="polite"></div></form>';
  }
  function clearMap(){if(map){map.remove();map=null}userMarker=null}
  function mountMap(p){
@@ -42,7 +43,7 @@ window.AKIBUJT_FEATURES=(()=>{
   if(!window.L){el.innerHTML='<p>A térkép nem töltődött be. A helyzetellenőrzés ettől még működik.</p>';return}
   map=L.map(el,{scrollWheelZoom:false}).setView([l.lat,lng(l)],16);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> közreműködők',maxZoom:19}).addTo(map);
-  L.circle([l.lat,lng(l)],{radius,color:'#591b28',fillColor:'#8d3549',fillOpacity:.13}).addTo(map);
+  L.circle([l.lat,lng(l)],{radius,color:'#367df0',fillColor:'#4ba3ff',fillOpacity:.13}).addTo(map);
   L.marker([l.lat,lng(l)]).addTo(map).bindPopup(l.name);
   setTimeout(()=>map&&map.invalidateSize(),100);
  }
@@ -58,7 +59,7 @@ window.AKIBUJT_FEATURES=(()=>{
   try{
    const result=await position(),l=p.location,coords=result.coords;
    const d=distance(coords.latitude,coords.longitude,l.lat,l.lng),accuracy=coords.accuracy;
-   if(map){if(userMarker)userMarker.setLatLng([coords.latitude,coords.longitude]);else userMarker=L.circleMarker([coords.latitude,coords.longitude],{radius:7,color:'#135f67',fillOpacity:1}).addTo(map).bindPopup('A te helyzeted');}
+   if(map){if(userMarker)userMarker.setLatLng([coords.latitude,coords.longitude]);else userMarker=L.circleMarker([coords.latitude,coords.longitude],{radius:7,color:'#4ba3ff',fillOpacity:1}).addTo(map).bindPopup('A te helyzeted');}
    // Accuracy is a radius of uncertainty. Require that it fits inside the zone.
    const allowed=Number.isFinite(accuracy)&&d+accuracy<=radius;
    feedback.textContent=allowed?'A helyzet rendben. Távolság: '+formatDistance(d)+'. Válaszolhatsz.':'A válasz még zárolva van. Távolság: '+formatDistance(d)+', helyadat pontossága: ±'+formatDistance(accuracy)+'. A teljes bizonytalansági körnek 200 méteren belül kell lennie.';
@@ -113,7 +114,9 @@ window.AKIBUJT_FEATURES=(()=>{
    }else if(type==='choice'){
     const value=new FormData(form).get('choice');
     correct=!!value&&(p.answers||[]).some(a=>norm(a)===norm(value));
-   }else if(type==='number'){
+   }else if(type==='self_report'){
+    correct=!!form.querySelector('#self-report-check')?.checked;
+   }else if(type==='number'||type==='count'){
     const raw=form.querySelector('#answer').value.replace(',','.');
     correct=raw.trim()!==''&&Number.isFinite(Number(raw))&&(p.answers||[]).some(a=>Number(a.replace(',','.'))===Number(raw));
    }else if(type==='order'){
@@ -123,7 +126,7 @@ window.AKIBUJT_FEATURES=(()=>{
     correct=selected.length===p.pairs.length&&selected.every((value,i)=>value===p.pairs[i].right)&&new Set(selected).size===selected.length;
    }else correct=(p.answers||[]).some(a=>norm(a)===norm(form.querySelector('#answer').value));
    if(correct)onCorrect();
-   else{if(type!=='photo')feedback.textContent='Ez a nyom még nem vezet tovább. Nézd át újra a bizonyítékokat!';button.disabled=false}
+   else{if(type!=='photo')feedback.textContent=type==='self_report'?'Jelöld be, hogy teljesítettétek a feladatot.':'Ez még nem a várt válasz. Nézd át újra a feladatot!';button.disabled=false}
   });
  }
  return {locationPanel,answerFields,bind,clearMap};

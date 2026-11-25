@@ -28,3 +28,7 @@ A `games.js` elején a `supportUrl` jelenleg üres. Csak valódi Buy Me a Coffee
 ## Éles indulás előtt
 
 A valódi támogatási és kapcsolati adatok, üzemeltetői és adatkezelési tájékoztatók, végleges jogtisztán használt képek, teljes játékos tesztelés és hozzáférhetőségi ellenőrzés szükséges. A jelenlegi játékidő szerkesztői becslés.
+
+### Játéktípusok
+
+A nyilvános gyűjtemény három részre oszlik: Kalandok (felfedezős feladatok), Nyomozások (krimitörténetek), Kihívások (rövid, önálló próbák). Az adminban a Játéktípus mező határozza meg, melyik gyűjteményben jelenik meg a játék. A kalandokhoz számolós, keresős és önbevallásos teljesítés is szerkeszthető. Részletek: `docs/GAME_AUTHORING_GUIDE.md`.
