@@ -1,0 +1,154 @@
+[
+  {
+    "id": "bpbujocska",
+    "title": "Budapest Bújócska – Kereslek!",
+    "kind": "adventure",
+    "category": "Városi felfedezés",
+    "difficulty": "Közepes",
+    "duration": "kb. 120 perc",
+    "players": "2–4 fő",
+    "image": "theme-budapest",
+    "status": "playable",
+    "version": 2,
+    "locationRequired": true,
+    "description": "Nyolc budapesti állomás a zeneszerzoGeo bújócskás videói nyomán. Indulj a Hősök teréről, járd végig a várost, és találd meg a finálé helyét!",
+    "intro": "A keresés a Hősök terén indul. A videók ihlette feladatok sorrendben nyílnak meg; minden állomáson a megjelölt pont 200 méteres körében tudsz válaszolni. Az útvonal gyaloglással és metróval körülbelül két óra. Maradjatok közterületen, és a múzeum tetőkertjének zárva tartásakor a külső közterületről oldjátok meg a feladatot.",
+    "ending": "KERESLEK! Végigjártad a budapesti bújócska útvonalát a Hősök terétől a Corvin térig. A három videós helyszín mellett a köztes megállók a játék kedvéért választott állomások, nem állítjuk róluk, hogy ott forgattak.",
+    "puzzles": [
+      {
+        "chapter": "01 / Hősök tere",
+        "title": "A keresés kezdete",
+        "story": "A metrós bújócska első részében a Hősök terén indul a kör. Nézz körül az emlékműnél, majd idézd fel, ki mutatta be az első búvóhelyet.",
+        "doc": "Forrás: zeneszerzoGeo – Metrós bújócska, 1. rész, 0:05. https://www.youtube.com/watch?v=GxonsLflQWg&t=5s",
+        "question": "Ki kezdte a metrós évad első bújását?",
+        "answerType": "choice",
+        "options": ["Marci", "Mókus", "Márk"],
+        "answers": ["Marci"],
+        "hints": ["A videó elején a Hősök terén beszél a bújó."],
+        "location": {"name": "Hősök tere – Millenniumi emlékmű", "lat": 47.515, "lng": 19.07778}
+      },
+      {
+        "chapter": "02 / Néprajzi Múzeum",
+        "title": "A tetőkerti nyom",
+        "story": "A következő videó szerint a keresés a Néprajzi Múzeum tetejéről folytatódott. A tetőkert helyett a múzeum melletti közterületről is teljesítheted a feladatot.",
+        "doc": "Forrás: zeneszerzoGeo – Metrós bújócska, 2. rész, 0:07. https://www.youtube.com/watch?v=41hWeAqGXvY&t=7s",
+        "question": "Melyik múzeum épülete vagy felirata előtt álltok? Írd be a nevét!",
+        "answerType": "find",
+        "answers": ["Néprajzi Múzeum", "Néprajzi"],
+        "hints": ["A Dózsa György úti épület nevét keresd."],
+        "location": {"name": "Néprajzi Múzeum – külső közterület", "lat": 47.515238, "lng": 19.076478}
+      },
+      {
+        "chapter": "03 / Bajza utca M",
+        "title": "Állomásnév",
+        "story": "A metrós szabály szerint a bújók metrómegállók környékén rejtőzhettek el. Ez az átkötő állomás a játék útvonalának része, nem forgatási helyszín.",
+        "doc": "A videókban a megállók körüli 500 méteres bújási szabály szerepel. A játék válaszadási sugara ettől függetlenül 200 méter.",
+        "question": "Melyik M1-es megálló neve olvasható itt a közterületi jelzésen?",
+        "answerType": "find",
+        "answers": ["Bajza utca", "Bajza"],
+        "hints": ["Az Andrássy út és a Bajza utca találkozásánál jársz."],
+        "location": {"name": "Bajza utca M – utcai bejárat", "lat": 47.5111, "lng": 19.0722}
+      },
+      {
+        "chapter": "04 / Kodály körönd M",
+        "title": "Megállószámlálás",
+        "story": "A keresők a megállók alapján szűkíthették a lehetséges búvóhelyeket. Nézd meg az M1 állomássorrendjét a megállóban vagy a térképen.",
+        "doc": "Útvonal: Kodály körönd → Bajza utca → Hősök tere. A köztes megállók számát kérjük.",
+        "question": "Hány köztes M1-es megálló van a Kodály körönd és a Hősök tere között?",
+        "answerType": "count",
+        "answers": ["1"],
+        "hints": ["A Bajza utca a két végpont között van."],
+        "location": {"name": "Kodály körönd M – utcai bejárat", "lat": 47.5094, "lng": 19.07}
+      },
+      {
+        "chapter": "05 / Oktogon M",
+        "title": "Hőmérő",
+        "story": "Az első évad hőmérő kérdése azt mutatta meg, hogy egy út után közelebb kerültek-e a bújóhoz. A következő cél a Deák Ferenc tér.",
+        "doc": "Forrás: zeneszerzoGeo – Bújócska, 1. évad 1. rész, 1:37. https://www.youtube.com/watch?v=JtMIqV0ghGc&t=97s",
+        "question": "A Kodály köröndről az Oktogonra haladva közelebb kerültetek a Deák Ferenc térhez?",
+        "answerType": "choice",
+        "options": ["Közelebb", "Távolabb", "Ugyanolyan távol"],
+        "answers": ["Közelebb"],
+        "hints": ["Nézd meg az M1 állomássorrendjét a belváros felé."],
+        "location": {"name": "Oktogon M – utcai bejárat", "lat": 47.5047, "lng": 19.0632}
+      },
+      {
+        "chapter": "06 / Deák Ferenc tér M",
+        "title": "Három metróvonal",
+        "story": "Az első évadban többféle kérdéskártyával szűkítették a keresést. Most keress olyan jelzést, amelyen a három itt találkozó metróvonal felismerhető.",
+        "doc": "Forrás: zeneszerzoGeo – Bújócska, 1. évad 1. rész, 1:12. https://www.youtube.com/watch?v=JtMIqV0ghGc&t=72s",
+        "question": "Párosítsd a Deák téren találkozó metróvonalakat a színükkel!",
+        "answerType": "matching",
+        "pairs": [{"left":"M1","right":"sárga"},{"left":"M2","right":"piros"},{"left":"M3","right":"kék"}],
+        "answers": [],
+        "hints": ["A vonalak színe a metrójelzésen is látható."],
+        "location": {"name": "Deák Ferenc tér – metróbejárat", "lat": 47.49772, "lng": 19.05376}
+      },
+      {
+        "chapter": "07 / Batthyány tér M+H",
+        "title": "Kétféle jelzés",
+        "story": "Marci a fináléban több Corvin nevű helyet említ. Mielőtt a Corvin térhez indultok, keressétek meg a Batthyány téren a metró és a HÉV közterületi jelzését.",
+        "doc": "Forrás: zeneszerzoGeo – első budapesti bújócska finálé, 0:28. https://www.youtube.com/watch?v=nu8Pte8WGS4&t=28s. A Batthyány tér az útvonal átkötő állomása, nem videós búvóhely.",
+        "question": "Láttátok a Batthyány téren az M és a H jelzést?",
+        "answerType": "self_report",
+        "answers": [],
+        "hints": [],
+        "location": {"name": "Batthyány tér – M és H bejárat", "lat": 47.50687, "lng": 19.03778}
+      },
+      {
+        "chapter": "08 / Corvin tér",
+        "title": "A finálé helye",
+        "story": "A bújócskás fináléban Marci a Corvin téren rejtőzött el, visszautalva a korábbi Corvin körúti helyszínre. Keresd meg a tér névtábláját közterületen.",
+        "doc": "Forrás: zeneszerzoGeo – első budapesti bújócska finálé, 0:28. https://www.youtube.com/watch?v=nu8Pte8WGS4&t=28s",
+        "question": "Ki bújt el a Corvin téren a fináléban?",
+        "answerType": "choice",
+        "options": ["Marci", "Mókus", "Márk"],
+        "answers": ["Marci"],
+        "hints": ["A videó fináléjának első perce segít."],
+        "location": {"name": "Corvin tér – közterületi névtábla", "lat": 47.502658, "lng": 19.037919}
+      }
+    ]
+  },
+  {
+    "id": "helymeghatarozas-teszt",
+    "title": "Helymeghatározás teszt – két helyszín",
+    "kind": "adventure",
+    "category": "Tesztjáték",
+    "difficulty": "Könnyű",
+    "duration": "kb. 90 perc utazással",
+    "players": "1+ fő",
+    "image": "theme-budapest",
+    "status": "playable",
+    "version": 1,
+    "locationRequired": true,
+    "description": "Két különálló budapesti állomás a 200 méteres helyellenőrzés kipróbálásához: Palotás utca 2., majd Halászbástya. A helyszínek között utazni kell.",
+    "intro": "A két feladat kizárólag a saját állomásának 200 méteres körzetében válaszolható meg. Először a 1152 Budapest, Palotás utca 2. előtt, közterületen próbáld ki az ellenőrzést; utána a Halászbástyánál. A böngészőben engedélyezd a helymeghatározást. A pontosságot is beleszámítjuk a távolságba, így beltérben érdemes újra próbálkozni a szabadban.",
+    "ending": "Mindkét helyszíni kapu működését végigpróbáltad. Az első feladat után a második állomásnak önálló helyellenőrzése van.",
+    "puzzles": [
+      {
+        "chapter": "01 / Palotás utca",
+        "title": "Első helyszín: Palotás utca 2.",
+        "story": "Állj meg a Palotás utca 2. közelében, nyilvános közterületen. Előbb a helyzetedet ellenőrizd, majd válaszolj.",
+        "doc": "Teszt: figyeld meg, hogy 200 méteren kívül vagy pontatlan GPS esetén zárolva marad-e a válaszmező.",
+        "question": "Melyik utcánál jársz?",
+        "answerType": "choice",
+        "options": ["Palotás utca", "Kossuth utca", "Bajza utca"],
+        "answers": ["Palotás utca"],
+        "hints": [],
+        "location": {"name": "1152 Budapest, Palotás utca 2. – közterület", "lat": 47.5588074, "lng": 19.1201911}
+      },
+      {
+        "chapter": "02 / Halászbástya",
+        "title": "Második helyszín: Halászbástya",
+        "story": "Utazz át a Halászbástyához. A második feladatot új helyellenőrzésnek kell feloldania; a Palotás utcai helyzet nem lehet elég hozzá.",
+        "doc": "A látogatható, közterületről elérhető részen maradj. A helyadatot beküldés előtt ismét frissítjük.",
+        "question": "Melyik nevezetességnél állsz?",
+        "answerType": "choice",
+        "options": ["Halászbástya", "Vajdahunyad vára", "Hősök tere"],
+        "answers": ["Halászbástya"],
+        "hints": [],
+        "location": {"name": "Halászbástya – látogatható terasz", "lat": 47.502308, "lng": 19.034813}
+      }
+    ]
+  }
+]
