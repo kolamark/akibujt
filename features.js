@@ -90,7 +90,7 @@ window.AKIBUJT_FEATURES=(()=>{
    feedback.textContent='Távolság: '+formatDistance(d)+' · GPS-pontosság: ±'+formatDistance(accuracy)+' · '+(allowed?'A válaszmező nyitva.':'A válaszmező zárolva. A teljes bizonytalansági körnek 200 méteren belül kell lennie.');
   },e=>{if(generation!==watchGeneration)return;if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=null;button.disabled=false;lock.disabled=true;feedback.textContent=e.code===1?'A helymeghatározás nincs engedélyezve. Engedélyezd a böngészőben.':'Nem sikerült pontos helyzetet kérni. Próbáld újra szabad ég alatt.'},{enableHighAccuracy:true,maximumAge:0,timeout:15000});
  }
- function bind(p,norm,onCorrect){
+ function bind(p,norm,onCorrect,onWrong=()=>{}){
   mountMap(p);
   const form=document.getElementById('answer-form'),lock=document.getElementById('answer-lock'),feedback=document.getElementById('feedback');
   const orderList=document.getElementById('order-list');
@@ -144,9 +144,13 @@ window.AKIBUJT_FEATURES=(()=>{
    }else if(type==='matching'){
     const selected=[...form.querySelectorAll('select[data-match]')].map(x=>x.value);
     correct=selected.length===p.pairs.length&&selected.every((value,i)=>value===p.pairs[i].right)&&new Set(selected).size===selected.length;
-   }else correct=(p.answers||[]).some(a=>norm(a)===norm(form.querySelector('#answer').value));
+   }else {
+    const raw=form.querySelector('#answer').value;
+    correct=(p.answers||[]).some(a=>norm(a)===norm(raw));
+    if(!correct&&p.answerRule==='no_code')correct=/^(nincs(en)?( (kod|belepo kod))?|nem (kell|szukseges|ker|kernek)( (kod|belepo kod)(ot)?)?|kod nelkul|nem kell kod|nincs kod)$/.test(norm(raw).replace(/[.,!?]+$/,''));
+   }
    if(correct)onCorrect();
-   else{if(type!=='photo')feedback.textContent=type==='self_report'?'Jelöld be, hogy teljesítettétek a feladatot.':'Ez még nem a várt válasz. Nézd át újra a feladatot!';button.disabled=false}
+   else{const attempted=type==='choice'?!!new FormData(form).get('choice'):type==='photo'?false:type==='self_report'?false:type==='text'||type==='find'?!!form.querySelector('#answer').value.trim():true;const penalty=attempted?Number(p.penaltyMinutes)||0:0;if(penalty>0)onWrong(penalty);if(type!=='photo')feedback.textContent=type==='self_report'?'Jelöld be, hogy teljesítettétek a feladatot.':'Ez még nem a várt válasz. Nézd át újra a feladatot!'+(penalty>0?' +'+penalty+' perc időbüntetés.':'');button.disabled=false}
   });
  }
  return {locationPanel,routePanel,answerFields,bind,clearMap};
