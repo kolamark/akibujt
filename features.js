@@ -3,7 +3,7 @@
 // but browser location can be spoofed; they are not a proof of physical presence.
 window.AKIBUJT_FEATURES=(()=>{
  const radius=200;
- let map=null,userMarker=null;
+ let map=null,routeMap=null,userMarker=null,accuracyCircle=null,watchId=null,watchGeneration=0;
  const formatDistance=n=>Math.round(n)+' m';
  function distance(a,b,c,d){
   const rad=Math.PI/180,dl=(c-a)*rad,do_=(d-b)*rad;
@@ -13,7 +13,7 @@ window.AKIBUJT_FEATURES=(()=>{
  function locationPanel(p,esc){
   if(!p.location)return '';
   const l=p.location;
-  return '<section class="location-gate"><h3>Helyszíni feladat</h3><p>A feladatot csak a helyszín 200 méteres körzetében teljesítheted. Engedélyezd a helymeghatározást; a pozíciód nem kerül a szerverünkre.</p><strong>'+esc(l.name)+'</strong><div id="location-map" role="region" aria-label="A feladat helyszíne térképen"></div><button class="btn secondary small" type="button" id="check-location">Itt vagyok – helyzet ellenőrzése</button><p id="location-feedback" class="feedback" role="status" aria-live="polite">A válaszmező még zárolva van.</p></section>';
+  return '<section class="location-gate"><h3>Helyszíni feladat</h3><p>A feladatot csak a helyszín 200 méteres körzetében teljesítheted. Engedélyezd a helymeghatározást; a pozíciód nem kerül a szerverünkre.</p><strong>'+esc(l.name)+'</strong><div id="location-map" role="region" aria-label="A feladat helyszíne térképen"></div><button class="btn secondary small" type="button" id="check-location">Helymeghatározás indítása</button><p id="location-feedback" class="feedback" role="status" aria-live="polite">A válaszmező még zárolva van. Indítás után a távolság és a pontosság folyamatosan frissül.</p></section>';
  }
  function shuffled(values,seed){
   const out=[...values];let n=2166136261;
@@ -35,9 +35,9 @@ window.AKIBUJT_FEATURES=(()=>{
   const question=['choice','order','matching','self_report'].includes(type)?'<p class="question">'+esc(p.question)+'</p>':'<label class="question" for="'+(type==='photo'?'answer-photo':'answer')+'">'+esc(p.question)+'</label>';
   return '<form class="answer-form" id="answer-form">'+question+'<fieldset id="answer-lock" '+(p.location?'disabled':'')+'><div class="answer-row">'+control+'<button class="btn" type="submit">'+(type==='self_report'?'Teljesítettük':'Ellenőrzés')+'</button></div></fieldset><div id="feedback" class="feedback" role="status" aria-live="polite"></div></form>';
  }
- function clearMap(){if(map){map.remove();map=null}userMarker=null}
+ function clearMap(){watchGeneration++;if(watchId!==null&&navigator.geolocation?.clearWatch)navigator.geolocation.clearWatch(watchId);watchId=null;if(map){map.remove();map=null}if(routeMap){routeMap.remove();routeMap=null}userMarker=null;accuracyCircle=null}
  function mountMap(p){
-  clearMap();
+  if(map){map.remove();map=null}userMarker=null;accuracyCircle=null;
   if(!p.location)return;
   const el=document.getElementById('location-map'),l=p.location;
   if(!window.L){el.innerHTML='<p>A térkép nem töltődött be. A helyzetellenőrzés ettől még működik.</p>';return}
@@ -48,6 +48,22 @@ window.AKIBUJT_FEATURES=(()=>{
   setTimeout(()=>map&&map.invalidateSize(),100);
  }
  const lng=l=>l.lng;
+ function routePanel(g,esc){
+  const stops=g.puzzles.map((p,i)=>({p,i})).filter(x=>x.p.location);
+  if(!stops.length)return '';
+  return '<section class="route-panel"><h2>Az útvonal állomásai</h2><p class="quiet">A térkép az állomások sorrendjét mutatja. Az összekötő vonalak nem gyalogos útvonalak.</p><div id="route-map" role="region" aria-label="A játék összes helyszíne térképen"></div><ol class="route-stops">'+stops.map(({p,i})=>'<li><strong>'+String(i+1).padStart(2,'0')+'. '+esc(p.location.name)+'</strong><span>'+esc(p.title)+'</span></li>').join('')+'</ol></section>';
+ }
+ function mountRoute(g,step){
+  const el=document.getElementById('route-map');if(!el)return;
+  if(!window.L){el.textContent='A térkép nem töltődött be; az állomások listája lent olvasható.';return}
+  const stops=g.puzzles.map((p,i)=>({p,i})).filter(x=>x.p.location);
+  routeMap=L.map(el,{scrollWheelZoom:false});
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> közreműködők',maxZoom:19}).addTo(routeMap);
+  const points=stops.map(({p})=>[p.location.lat,p.location.lng]);
+  if(points.length>1)L.polyline(points,{color:'#66adff',weight:3,dashArray:'6 8'}).addTo(routeMap);
+  stops.forEach(({p,i})=>L.circleMarker([p.location.lat,p.location.lng],{radius:10,color:i<step?'#55c9a3':i===step?'#f6be65':'#78a9ef',fillOpacity:1}).addTo(routeMap).bindPopup((i+1)+'. '+p.location.name));
+  routeMap.fitBounds(L.latLngBounds(points).pad(.15),{maxZoom:15});setTimeout(()=>routeMap&&routeMap.invalidateSize(),100);
+ }
  function position(){
   return new Promise((resolve,reject)=>{
    if(!navigator.geolocation){reject(Error('A készülék nem támogatja a helymeghatározást.'));return}
@@ -59,12 +75,26 @@ window.AKIBUJT_FEATURES=(()=>{
   try{
    const result=await position(),l=p.location,coords=result.coords;
    const d=distance(coords.latitude,coords.longitude,l.lat,l.lng),accuracy=coords.accuracy;
-   if(map){if(userMarker)userMarker.setLatLng([coords.latitude,coords.longitude]);else userMarker=L.circleMarker([coords.latitude,coords.longitude],{radius:7,color:'#4ba3ff',fillOpacity:1}).addTo(map).bindPopup('A te helyzeted');}
+   showPosition(coords);
    // Accuracy is a radius of uncertainty. Require that it fits inside the zone.
    const allowed=Number.isFinite(accuracy)&&d+accuracy<=radius;
    feedback.textContent=allowed?'A helyzet rendben. Távolság: '+formatDistance(d)+'. Válaszolhatsz.':'A válasz még zárolva van. Távolság: '+formatDistance(d)+', helyadat pontossága: ±'+formatDistance(accuracy)+'. A teljes bizonytalansági körnek 200 méteren belül kell lennie.';
    return allowed;
   }catch(e){feedback.textContent=e.message;return false}
+ }
+ function showPosition(coords){if(!map)return;const point=[coords.latitude,coords.longitude];if(userMarker)userMarker.setLatLng(point);else userMarker=L.circleMarker(point,{radius:7,color:'#4ba3ff',fillOpacity:1}).addTo(map).bindPopup('A te helyzeted');if(accuracyCircle)accuracyCircle.setLatLng(point).setRadius(coords.accuracy);else accuracyCircle=L.circle(point,{radius:coords.accuracy,color:'#4ba3ff',fillOpacity:.08,weight:1}).addTo(map)}
+ function startTracking(p,lock,feedback,button){
+  if(!navigator.geolocation?.watchPosition){feedback.textContent='A készülék nem támogatja a folyamatos helymeghatározást.';return}
+  if(watchId!==null)return;
+  const generation=++watchGeneration;feedback.textContent='Helyzet keresése…';button.disabled=true;
+  watchId=navigator.geolocation.watchPosition(result=>{
+   if(generation!==watchGeneration)return;
+   button.disabled=false;button.textContent='Helyzet frissítése';
+   const l=p.location,c=result.coords,d=distance(c.latitude,c.longitude,l.lat,l.lng),accuracy=c.accuracy;
+   const allowed=Number.isFinite(accuracy)&&d+accuracy<=radius;
+   showPosition(c);lock.disabled=!allowed;
+   feedback.textContent='Távolság: '+formatDistance(d)+' · GPS-pontosság: ±'+formatDistance(accuracy)+' · '+(allowed?'A válaszmező nyitva.':'A válaszmező zárolva. A teljes bizonytalansági körnek 200 méteren belül kell lennie.');
+  },e=>{if(generation!==watchGeneration)return;if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=null;button.disabled=false;lock.disabled=true;feedback.textContent=e.code===1?'A helymeghatározás nincs engedélyezve. Engedélyezd a böngészőben.':'Nem sikerült pontos helyzetet kérni. Próbáld újra szabad ég alatt.'},{enableHighAccuracy:true,maximumAge:0,timeout:15000});
  }
  function bind(p,norm,onCorrect){
   mountMap(p);
@@ -89,11 +119,7 @@ window.AKIBUJT_FEATURES=(()=>{
    });
    orderList.addEventListener('dragend',()=>{dragged=null});
   }
-  if(p.location)document.getElementById('check-location').addEventListener('click',async e=>{
-   e.currentTarget.disabled=true;
-   lock.disabled=!(await check(p,document.getElementById('location-feedback')));
-   e.currentTarget.disabled=false;
-  });
+  if(p.location)document.getElementById('check-location').addEventListener('click',e=>startTracking(p,lock,document.getElementById('location-feedback'),e.currentTarget));
   const photo=document.getElementById('answer-photo');
   if(photo)photo.addEventListener('change',()=>{
    const preview=document.getElementById('photo-preview');
@@ -129,5 +155,5 @@ window.AKIBUJT_FEATURES=(()=>{
    else{if(type!=='photo')feedback.textContent=type==='self_report'?'Jelöld be, hogy teljesítettétek a feladatot.':'Ez még nem a várt válasz. Nézd át újra a feladatot!';button.disabled=false}
   });
  }
- return {locationPanel,answerFields,bind,clearMap};
+ return {locationPanel,routePanel,mountRoute,answerFields,bind,clearMap};
 })();
