@@ -51,7 +51,7 @@ window.AKIBUJT_FEATURES=(()=>{
  function routePanel(g,esc){
   const stops=g.puzzles.map((p,i)=>({p,i})).filter(x=>x.p.location);
   if(!stops.length)return '';
-  return '<section class="route-panel"><h2>Az útvonal állomásai</h2><p class="quiet">A térkép az állomások sorrendjét mutatja. Az összekötő vonalak nem gyalogos útvonalak.</p><div id="route-map" role="region" aria-label="A játék összes helyszíne térképen"></div><ol class="route-stops">'+stops.map(({p,i})=>'<li><strong>'+String(i+1).padStart(2,'0')+'. '+esc(p.location.name)+'</strong><span>'+esc(p.title)+'</span></li>').join('')+'</ol></section>';
+  return '<section class="route-panel"><h2>Teljesített útvonal</h2><p class="quiet">Az állomások teljes sorrendje. A szaggatott vonal nem gyalogos navigáció.</p><div id="route-map" role="region" aria-label="A játék összes helyszíne térképen"></div><ol class="route-stops">'+stops.map(({p,i})=>'<li><strong>'+String(i+1).padStart(2,'0')+'. '+esc(p.location.name)+'</strong><span>'+esc(p.title)+'</span></li>').join('')+'</ol></section>';
  }
  function mountRoute(g,step){
   const el=document.getElementById('route-map');if(!el)return;
