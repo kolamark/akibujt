@@ -3,7 +3,7 @@
 // but browser location can be spoofed; they are not a proof of physical presence.
 window.AKIBUJT_FEATURES=(()=>{
  const radius=200;
- let map=null,routeMap=null,userMarker=null,accuracyCircle=null,watchId=null,watchGeneration=0;
+ let map=null,userMarker=null,accuracyCircle=null,watchId=null,watchGeneration=0;
  const formatDistance=n=>Math.round(n)+' m';
  function distance(a,b,c,d){
   const rad=Math.PI/180,dl=(c-a)*rad,do_=(d-b)*rad;
@@ -35,7 +35,7 @@ window.AKIBUJT_FEATURES=(()=>{
   const question=['choice','order','matching','self_report'].includes(type)?'<p class="question">'+esc(p.question)+'</p>':'<label class="question" for="'+(type==='photo'?'answer-photo':'answer')+'">'+esc(p.question)+'</label>';
   return '<form class="answer-form" id="answer-form">'+question+'<fieldset id="answer-lock" '+(p.location?'disabled':'')+'><div class="answer-row">'+control+'<button class="btn" type="submit">'+(type==='self_report'?'Teljesítettük':'Ellenőrzés')+'</button></div></fieldset><div id="feedback" class="feedback" role="status" aria-live="polite"></div></form>';
  }
- function clearMap(){watchGeneration++;if(watchId!==null&&navigator.geolocation?.clearWatch)navigator.geolocation.clearWatch(watchId);watchId=null;if(map){map.remove();map=null}if(routeMap){routeMap.remove();routeMap=null}userMarker=null;accuracyCircle=null}
+ function clearMap(){watchGeneration++;if(watchId!==null&&navigator.geolocation?.clearWatch)navigator.geolocation.clearWatch(watchId);watchId=null;if(map){map.remove();map=null}userMarker=null;accuracyCircle=null}
  function mountMap(p){
   if(map){map.remove();map=null}userMarker=null;accuracyCircle=null;
   if(!p.location)return;
@@ -51,18 +51,13 @@ window.AKIBUJT_FEATURES=(()=>{
  function routePanel(g,esc){
   const stops=g.puzzles.map((p,i)=>({p,i})).filter(x=>x.p.location);
   if(!stops.length)return '';
-  return '<section class="route-panel"><h2>Teljesített útvonal</h2><p class="quiet">Az állomások teljes sorrendje. A szaggatott vonal nem gyalogos navigáció.</p><div id="route-map" role="region" aria-label="A játék összes helyszíne térképen"></div><ol class="route-stops">'+stops.map(({p,i})=>'<li><strong>'+String(i+1).padStart(2,'0')+'. '+esc(p.location.name)+'</strong><span>'+esc(p.title)+'</span></li>').join('')+'</ol></section>';
- }
- function mountRoute(g,step){
-  const el=document.getElementById('route-map');if(!el)return;
-  if(!window.L){el.textContent='A térkép nem töltődött be; az állomások listája lent olvasható.';return}
-  const stops=g.puzzles.map((p,i)=>({p,i})).filter(x=>x.p.location);
-  routeMap=L.map(el,{scrollWheelZoom:false});
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> közreműködők',maxZoom:19}).addTo(routeMap);
-  const points=stops.map(({p})=>[p.location.lat,p.location.lng]);
-  if(points.length>1)L.polyline(points,{color:'#66adff',weight:3,dashArray:'6 8'}).addTo(routeMap);
-  stops.forEach(({p,i})=>L.circleMarker([p.location.lat,p.location.lng],{radius:10,color:i<step?'#55c9a3':i===step?'#f6be65':'#78a9ef',fillOpacity:1}).addTo(routeMap).bindPopup((i+1)+'. '+p.location.name));
-  routeMap.fitBounds(L.latLngBounds(points).pad(.15),{maxZoom:15});setTimeout(()=>routeMap&&routeMap.invalidateSize(),100);
+  const shape=window.AKIBUJT_MAP;
+  const point=l=>{const [west,south,east,north]=shape.bounds;return [80+(l.lng-west)/(east-west)*840,50+(north-l.lat)/(north-south)*460].map(v=>v.toFixed(1))};
+  const offsets=[[30,-38],[-24,-51],[53,-28],[69,3],[62,38],[12,56],[-44,36],[-56,-4]];
+  const markers=shape?stops.map(({p,i})=>{const [x,y]=point(p.location),[dx,dy]=offsets[i%offsets.length],lx=(Number(x)+dx).toFixed(1),ly=(Number(y)+dy).toFixed(1);return '<g class="route-pin"><line x1="'+x+'" y1="'+y+'" x2="'+lx+'" y2="'+ly+'"/><circle class="route-point" cx="'+x+'" cy="'+y+'" r="5"/><circle cx="'+lx+'" cy="'+ly+'" r="13"/><text x="'+lx+'" y="'+ly+'" dy="5" text-anchor="middle">'+(i+1)+'</text><title>'+(i+1)+'. '+esc(p.location.name)+'</title></g>'}).join(''):'';
+  const path=shape?stops.map(({p})=>point(p.location).join(',')).join(' '):'';
+  const graphic=shape?'<svg id="route-map" viewBox="0 0 1000 560" role="img" aria-label="Budapest kontúrja, a Duna és a teljesített állomások"><rect width="1000" height="560" fill="#20385b"/><path class="city-outline" d="'+shape.outline+'"/><path class="danube" d="'+shape.river+'"/><polyline class="route-line" points="'+path+'"/>'+markers+'<text x="790" y="535" class="map-label">BUDAPEST · DUNA</text></svg>':'<p>A térkép nem tölthető be; az állomások listája lent olvasható.</p>';
+  return '<section class="route-panel"><h2>Teljesített útvonal</h2><p class="quiet">Budapest kontúrja és az állomások sorrendje. Az összekötő vonal nem gyalogos navigáció.</p>'+graphic+'<ol class="route-stops">'+stops.map(({p,i})=>'<li><strong>'+String(i+1).padStart(2,'0')+'. '+esc(p.location.name)+'</strong><span>'+esc(p.title)+'</span></li>').join('')+'</ol><p class="map-credit">Budapest közigazgatási kontúrja: geoHungary; a Duna vonala stilizált.</p></section>';
  }
  function position(){
   return new Promise((resolve,reject)=>{
@@ -155,5 +150,5 @@ window.AKIBUJT_FEATURES=(()=>{
    else{if(type!=='photo')feedback.textContent=type==='self_report'?'Jelöld be, hogy teljesítettétek a feladatot.':'Ez még nem a várt válasz. Nézd át újra a feladatot!';button.disabled=false}
   });
  }
- return {locationPanel,routePanel,mountRoute,answerFields,bind,clearMap};
+ return {locationPanel,routePanel,answerFields,bind,clearMap};
 })();
